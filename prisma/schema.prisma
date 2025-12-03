@@ -1,0 +1,728 @@
+/// Prisma schema for Research X multi-tenant PhD Management Platform.
+/// Captures core entities for RBAC, admissions, documents, finances, communications,
+/// and research tracking while keeping relations explicit and maintainable.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum RoleKey {
+  SUPER_ADMIN
+  ADMIN
+  SUPERVISOR
+  SCHOLAR
+  DEVELOPER
+}
+
+enum AdmissionStatus {
+  APPLIED
+  VERIFIED
+  INTERVIEW_SCHEDULED
+  FEE_PENDING
+  ENROLLED
+  REJECTED
+  WAITLISTED
+}
+
+enum AdmissionPathway {
+  NET_JRF
+  GATE
+  UNIVERSITY_EXAM
+  DIRECT_OTHER
+}
+
+enum DocumentStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum DocumentType {
+  SYNOPSIS
+  THESIS
+  REPORT
+  RECEIPT
+  IDENTIFICATION
+  OTHER
+}
+
+enum MeetingStatus {
+  REQUESTED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationType {
+  SYSTEM
+  DEADLINE
+  MESSAGE
+  FINANCE
+  DOCUMENT
+}
+
+enum ReminderChannel {
+  IN_APP
+  EMAIL
+  SMS
+}
+
+model Tenant {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  description  String?
+  contactEmail String?
+  contactPhone String?
+  theme        Json?
+  metadata     Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  roles                Role[]
+  memberships          TenantMembership[]
+  departments          Department[]
+  programs             Program[]
+  admissions           Admission[]           @relation("TenantAdmissions")
+  scholarProfiles      ScholarProfile[]
+  supervisorProfiles   SupervisorProfile[]
+  scholarships         Scholarship[]
+  feeLedgerEntries     FeeLedgerEntry[]
+  documents            Document[]
+  messageThreads       MessageThread[]
+  notifications        Notification[]
+  meetings             Meeting[]
+  auditLogs            AuditLog[]
+  featureFlags         TenantFeatureFlag[]   @relation("TenantFeatureFlags")
+  reminderRules        ReminderRule[]
+  researchProjects     ResearchProject[]
+  defaultUsers         User[]                @relation("TenantDefaultUsers")
+  activeUsers          User[]                @relation("TenantActiveUsers")
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  tenantId    String?
+  key         RoleKey
+  name        String
+  description String?
+  permissions String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant       Tenant?           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  memberships  TenantMembership[]
+
+  @@unique([tenantId, key])
+}
+
+model User {
+  id                   String        @id @default(cuid())
+  email                String        @unique
+  phone                String?       @unique
+  hashedPassword       String
+  firstName            String
+  lastName             String
+  displayName          String?
+  defaultTenantId      String?
+  activeTenantId       String?
+  emailVerified        DateTime?
+  locale               String?       @default("en")
+  timeZone             String?       @default("Asia/Kolkata")
+  metadata             Json?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  defaultTenant        Tenant?                @relation("TenantDefaultUsers", fields: [defaultTenantId], references: [id])
+  activeTenant         Tenant?                @relation("TenantActiveUsers", fields: [activeTenantId], references: [id])
+  memberships          TenantMembership[]
+  messages             Message[]              @relation("MessageAuthor")
+  auditLogs            AuditLog[]             @relation("UserAuditLogs")
+  accounts             Account[]
+  sessions             Session[]
+  admissions           Admission[]            @relation("UserAdmissions")
+  scholarProfile       ScholarProfile?        @relation("ScholarUser")
+  supervisorProfile    SupervisorProfile?     @relation("SupervisorUser")
+  ownedDocuments       Document[]             @relation("DocumentOwner")
+  documentUploads      DocumentVersion[]      @relation("DocumentUploader")
+  recordedObservations ResearchObservation[]  @relation("ObservationRecorder")
+  reviewedObservations ResearchObservation[]  @relation("ObservationReviewer")
+}
+
+model TenantMembership {
+  id          String   @id @default(cuid())
+  userId      String
+  tenantId    String
+  roleId      String
+  title       String?
+  status      String   @default("active")
+  primary     Boolean  @default(false)
+  permissions String[] @default([])
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user                 User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant               Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  role                 Role                    @relation(fields: [roleId], references: [id])
+  scholarProfile       ScholarProfile?         @relation("ScholarMembership")
+  supervisorProfile    SupervisorProfile?      @relation("SupervisorMembership")
+  createdThreads       MessageThread[]         @relation("ThreadCreator")
+  threadParticipants   MessageThreadParticipant[] @relation("MembershipThreadParticipants")
+  notifications        Notification[]          @relation("NotificationRecipient")
+  organizedMeetings    Meeting[]               @relation("MeetingOrganizer")
+  meetingParticipations MeetingParticipant[]   @relation("MembershipMeetingParticipants")
+
+  @@unique([userId, tenantId, roleId])
+}
+
+model Department {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  code        String?
+  description String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant              Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  programs            Program[]           @relation("DepartmentPrograms")
+  supervisorProfiles  SupervisorProfile[] @relation("SupervisorDepartment")
+
+  @@unique([tenantId, name])
+}
+
+model Program {
+  id                 String   @id @default(cuid())
+  tenantId           String
+  departmentId       String?
+  name               String
+  code               String?
+  durationMonths     Int
+  maxExtensionMonths Int?
+  courseworkRequired Boolean   @default(true)
+  metadata           Json?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  department      Department?      @relation("DepartmentPrograms", fields: [departmentId], references: [id])
+  courses         Course[]
+  milestones      ProgramMilestone[]
+  admissions      Admission[]      @relation("ProgramAdmissions")
+  scholarProfiles ScholarProfile[] @relation("ProgramScholars")
+
+  @@unique([tenantId, name])
+}
+
+model Course {
+  id          String  @id @default(cuid())
+  programId   String
+  code        String
+  title       String
+  credits     Float
+  description String?
+  syllabusUrl String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  program     Program                   @relation(fields: [programId], references: [id], onDelete: Cascade)
+  enrollments ScholarCourseEnrollment[] @relation("ScholarEnrollmentCourse")
+
+  @@unique([programId, code])
+}
+
+model ProgramMilestone {
+  id          String  @id @default(cuid())
+  programId   String
+  name        String
+  description String?
+  order       Int
+  dueInMonths Int?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  program          Program           @relation(fields: [programId], references: [id], onDelete: Cascade)
+  scholarMilestones ScholarMilestone[] @relation("ScholarMilestoneMilestone")
+
+  @@unique([programId, order])
+}
+
+model Admission {
+  id              String           @id @default(cuid())
+  tenantId        String
+  programId       String
+  userId          String
+  status          AdmissionStatus  @default(APPLIED)
+  pathway         AdmissionPathway
+  applicationData Json
+  evaluationNotes Json?
+  decisionAt      DateTime?
+  offerLetterUrl  String?
+  feeReceiptUrl   String?
+  metadata        Json?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  tenant         Tenant         @relation("TenantAdmissions", fields: [tenantId], references: [id], onDelete: Cascade)
+  program        Program        @relation("ProgramAdmissions", fields: [programId], references: [id])
+  user           User           @relation("UserAdmissions", fields: [userId], references: [id])
+  scholarProfile ScholarProfile? @relation("ScholarAdmission")
+}
+
+model ScholarProfile {
+  id               String   @id @default(cuid())
+  membershipId     String   @unique
+  userId           String   @unique
+  tenantId         String
+  admissionId      String?  @unique
+  enrollmentNumber String?  @unique
+  researchTitle    String?
+  specialization   String?
+  status           String   @default("active")
+  currentProgramId String?
+  metadata         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  membership        TenantMembership          @relation("ScholarMembership", fields: [membershipId], references: [id], onDelete: Cascade)
+  user              User                      @relation("ScholarUser", fields: [userId], references: [id], onDelete: Cascade)
+  tenant            Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  program           Program?                  @relation("ProgramScholars", fields: [currentProgramId], references: [id])
+  admission         Admission?                @relation("ScholarAdmission", fields: [admissionId], references: [id])
+  supervisors       ScholarSupervisor[]       @relation("ScholarSupervisorScholar")
+  courseEnrollments ScholarCourseEnrollment[] @relation("ScholarEnrollmentScholar")
+  milestones        ScholarMilestone[]        @relation("ScholarMilestoneScholar")
+  scholarshipAwards ScholarshipAward[]        @relation("ScholarshipAwardScholar")
+  feeLedgerEntries  FeeLedgerEntry[]          @relation("FeeLedgerScholar")
+  documents         Document[]                @relation("DocumentScholar")
+  researchProjects  ResearchProject[]         @relation("ScholarResearchProjects")
+}
+
+model SupervisorProfile {
+  id             String   @id @default(cuid())
+  membershipId   String   @unique
+  userId         String   @unique
+  tenantId       String
+  departmentId   String?
+  designation    String?
+  workloadTarget Int?
+  bio            String?
+  availability   Json?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  membership TenantMembership   @relation("SupervisorMembership", fields: [membershipId], references: [id], onDelete: Cascade)
+  user       User               @relation("SupervisorUser", fields: [userId], references: [id], onDelete: Cascade)
+  tenant     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  department Department?        @relation("SupervisorDepartment", fields: [departmentId], references: [id])
+  scholars   ScholarSupervisor[] @relation("ScholarSupervisorSupervisor")
+}
+
+model ScholarSupervisor {
+  id           String  @id @default(cuid())
+  scholarId    String
+  supervisorId String
+  role         String  /// primary|co_supervisor|mentor
+  assignedAt   DateTime @default(now())
+  releasedAt   DateTime?
+  notes        Json?
+
+  scholar    ScholarProfile    @relation("ScholarSupervisorScholar", fields: [scholarId], references: [id], onDelete: Cascade)
+  supervisor SupervisorProfile @relation("ScholarSupervisorSupervisor", fields: [supervisorId], references: [id], onDelete: Cascade)
+
+  @@unique([scholarId, supervisorId, role])
+}
+
+model ScholarCourseEnrollment {
+  id            String  @id @default(cuid())
+  scholarId     String
+  courseId      String
+  academicYear  String
+  semester      String
+  status        String  @default("in_progress")
+  grade         String?
+  marksObtained Float?
+  attendancePct Float?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  scholar ScholarProfile @relation("ScholarEnrollmentScholar", fields: [scholarId], references: [id], onDelete: Cascade)
+  course  Course         @relation("ScholarEnrollmentCourse", fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([scholarId, courseId, academicYear, semester])
+}
+
+model ScholarMilestone {
+  id            String  @id @default(cuid())
+  scholarId     String
+  milestoneId   String
+  status        String  @default("pending")
+  expectedBy    DateTime?
+  completedAt   DateTime?
+  notes         Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  scholar   ScholarProfile   @relation("ScholarMilestoneScholar", fields: [scholarId], references: [id], onDelete: Cascade)
+  milestone ProgramMilestone @relation("ScholarMilestoneMilestone", fields: [milestoneId], references: [id], onDelete: Cascade)
+
+  @@unique([scholarId, milestoneId])
+}
+
+model Scholarship {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  type        String   /// Government | Private | University | NGO
+  sponsor     String?
+  description String?
+  currency    String   @default("INR")
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  awards ScholarshipAward[] @relation("ScholarshipAwardScholarship")
+
+  @@unique([tenantId, name])
+}
+
+model ScholarshipAward {
+  id               String   @id @default(cuid())
+  scholarshipId    String
+  scholarId        String
+  sanctionedAmount Decimal  @db.Decimal(18, 2)
+  disbursementCode String?
+  schedule         Json?
+  status           String   @default("active")
+  metadata         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  scholarship    Scholarship   @relation("ScholarshipAwardScholarship", fields: [scholarshipId], references: [id], onDelete: Cascade)
+  scholar        ScholarProfile @relation("ScholarshipAwardScholar", fields: [scholarId], references: [id], onDelete: Cascade)
+  ledgerEntries  FeeLedgerEntry[] @relation("FeeLedgerScholarshipAward")
+  documents      Document[]       @relation("DocumentScholarshipAward")
+
+  @@unique([scholarshipId, scholarId])
+}
+
+model FeeLedgerEntry {
+  id                 String   @id @default(cuid())
+  tenantId           String
+  scholarId          String
+  scholarshipAwardId String?
+  type               String   /// fee | payment | adjustment
+  description        String?
+  amount             Decimal  @db.Decimal(18, 2)
+  currency           String   @default("INR")
+  dueDate            DateTime?
+  paidAt             DateTime?
+  referenceNumber    String?
+  metadata           Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  scholar          ScholarProfile    @relation("FeeLedgerScholar", fields: [scholarId], references: [id], onDelete: Cascade)
+  scholarshipAward ScholarshipAward? @relation("FeeLedgerScholarshipAward", fields: [scholarshipAwardId], references: [id])
+  documents        Document[]        @relation("DocumentFeeLedger")
+}
+
+model Document {
+  id                 String         @id @default(cuid())
+  tenantId           String
+  ownerUserId        String?
+  scholarId          String?
+  scholarshipAwardId String?
+  feeLedgerEntryId   String?
+  type               DocumentType   @default(OTHER)
+  status             DocumentStatus @default(DRAFT)
+  currentVersionId   String?  @unique
+  title              String?
+  description        String?
+  tags               String[]       @default([])
+  metadata           Json?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  ownerUser        User?             @relation("DocumentOwner", fields: [ownerUserId], references: [id])
+  scholar          ScholarProfile?   @relation("DocumentScholar", fields: [scholarId], references: [id])
+  scholarshipAward ScholarshipAward? @relation("DocumentScholarshipAward", fields: [scholarshipAwardId], references: [id])
+  feeLedgerEntry   FeeLedgerEntry?   @relation("DocumentFeeLedger", fields: [feeLedgerEntryId], references: [id])
+  currentVersion   DocumentVersion?  @relation("DocumentCurrentVersion", fields: [currentVersionId], references: [id])
+  versions         DocumentVersion[] @relation("DocumentVersions")
+  auditLogs        AuditLog[]        @relation("DocumentLogs")
+}
+
+model DocumentVersion {
+  id           String   @id @default(cuid())
+  documentId   String
+  uploadedById String
+  storageKey   String
+  fileName     String
+  mimeType     String
+  checksum     String
+  sizeBytes    Int
+  uploadedAt   DateTime @default(now())
+  metadata     Json?
+
+  document   Document @relation("DocumentVersions", fields: [documentId], references: [id], onDelete: Cascade)
+  uploadedBy User     @relation("DocumentUploader", fields: [uploadedById], references: [id])
+  currentFor Document? @relation("DocumentCurrentVersion")
+}
+
+model MessageThread {
+  id          String   @id @default(cuid())
+  tenantId    String
+  subject     String?
+  createdById String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant      Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdBy   TenantMembership       @relation("ThreadCreator", fields: [createdById], references: [id])
+  messages    Message[]
+  participants MessageThreadParticipant[] @relation("ThreadParticipants")
+}
+
+model MessageThreadParticipant {
+  id           String   @id @default(cuid())
+  threadId     String
+  membershipId String
+  role         String
+  lastReadAt   DateTime?
+
+  thread     MessageThread   @relation("ThreadParticipants", fields: [threadId], references: [id], onDelete: Cascade)
+  membership TenantMembership @relation("MembershipThreadParticipants", fields: [membershipId], references: [id], onDelete: Cascade)
+
+  @@unique([threadId, membershipId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  threadId  String
+  authorId  String
+  body      String
+  attachments Json?
+  sentAt    DateTime @default(now())
+
+  thread MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  author User          @relation("MessageAuthor", fields: [authorId], references: [id])
+}
+
+model Notification {
+  id                String           @id @default(cuid())
+  tenantId          String
+  recipientId       String
+  type              NotificationType @default(SYSTEM)
+  title             String
+  body              String
+  data              Json?
+  readAt            DateTime?
+  deliveredAt       DateTime?
+  channels          ReminderChannel[] @default([IN_APP])
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  tenant    Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  recipient TenantMembership @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+}
+
+model Meeting {
+  id           String        @id @default(cuid())
+  tenantId     String
+  organizerId  String
+  title        String
+  agenda       String?
+  scheduledFor DateTime
+  status       MeetingStatus @default(REQUESTED)
+  location     String?
+  meetingLink  String?
+  metadata     Json?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  tenant      Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  organizer   TenantMembership       @relation("MeetingOrganizer", fields: [organizerId], references: [id])
+  participants MeetingParticipant[]  @relation("MeetingParticipants")
+}
+
+model MeetingParticipant {
+  id           String   @id @default(cuid())
+  meetingId    String
+  membershipId String
+  attendance   String?
+  feedback     Json?
+
+  meeting    Meeting          @relation("MeetingParticipants", fields: [meetingId], references: [id], onDelete: Cascade)
+  membership TenantMembership @relation("MembershipMeetingParticipants", fields: [membershipId], references: [id], onDelete: Cascade)
+
+  @@unique([meetingId, membershipId])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  tenantId   String
+  userId     String?
+  documentId String?
+  action     String
+  context    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user     User?     @relation("UserAuditLogs", fields: [userId], references: [id])
+  document Document? @relation("DocumentLogs", fields: [documentId], references: [id])
+}
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  description String?
+  defaultOn   Boolean  @default(false)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenantOverrides TenantFeatureFlag[] @relation("FeatureFlagTenants")
+}
+
+model TenantFeatureFlag {
+  id       String  @id @default(cuid())
+  tenantId String
+  flagId   String
+  enabled  Boolean @default(false)
+  metadata Json?
+
+  tenant Tenant      @relation("TenantFeatureFlags", fields: [tenantId], references: [id], onDelete: Cascade)
+  flag   FeatureFlag @relation("FeatureFlagTenants", fields: [flagId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, flagId])
+}
+
+model ReminderRule {
+  id          String            @id @default(cuid())
+  tenantId    String
+  name        String
+  description String?
+  targetType  String
+  targetId    String?
+  schedule    Json
+  channels    ReminderChannel[] @default([IN_APP])
+  filters     Json?
+  metadata    Json?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model ResearchProject {
+  id            String   @id @default(cuid())
+  tenantId      String
+  scholarId     String
+  title         String
+  objective     String?
+  fieldLocation Json?
+  startDate     DateTime?
+  endDate       DateTime?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tenant       Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  scholar      ScholarProfile     @relation("ScholarResearchProjects", fields: [scholarId], references: [id], onDelete: Cascade)
+  observations ResearchObservation[] @relation("ProjectObservations")
+  media        ResearchMedia[]       @relation("ProjectMedia")
+}
+
+model ResearchObservation {
+  id            String   @id @default(cuid())
+  projectId     String
+  recordedById  String
+  recordedAt    DateTime @default(now())
+  metrics       Json
+  actions       Json?
+  notes         String?
+  status        String   @default("pending_review")
+  reviewedById  String?
+  reviewedAt    DateTime?
+  reviewNotes   String?
+  metadata      Json?
+
+  project     ResearchProject @relation("ProjectObservations", fields: [projectId], references: [id], onDelete: Cascade)
+  recordedBy  User            @relation("ObservationRecorder", fields: [recordedById], references: [id])
+  reviewedBy  User?           @relation("ObservationReviewer", fields: [reviewedById], references: [id])
+  attachments ResearchMedia[] @relation("ObservationMedia")
+}
+
+model ResearchMedia {
+  id            String   @id @default(cuid())
+  projectId     String
+  observationId String?
+  storageKey    String
+  fileName      String
+  mimeType      String
+  sizeBytes     Int
+  capturedAt    DateTime?
+  metadata      Json?
+
+  project     ResearchProject     @relation("ProjectMedia", fields: [projectId], references: [id], onDelete: Cascade)
+  observation ResearchObservation? @relation("ObservationMedia", fields: [observationId], references: [id])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  oauth_token_secret String? @db.Text
+  oauth_token        String? @db.Text
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
