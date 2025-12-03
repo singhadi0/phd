@@ -1,10 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function SupervisorScholarsPage({
+export default async function SupervisorScholarsPage({
     params,
 }: {
-    params: { tenantSlug: string };
+    params: Promise<{ tenantSlug: string }>;
 }) {
+    const { tenantSlug } = await params;
     return (
         <div className="space-y-6">
             <div className="space-y-2">
@@ -12,7 +13,7 @@ export default function SupervisorScholarsPage({
                     Scholar roster
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                    Detailed scholar assignments, performance insights, and communication tools will surface here for {params.tenantSlug}.
+                    Detailed scholar assignments, performance insights, and communication tools will surface here for {tenantSlug}.
                 </p>
             </div>
             <Card className="border-border/60 bg-card/70">

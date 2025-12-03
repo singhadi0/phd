@@ -1,5 +1,3 @@
-import { randomBytes } from "crypto";
-
 import argon2 from "argon2";
 import { AdmissionPathway, AdmissionStatus } from "@prisma/client";
 import { z } from "zod";
@@ -135,7 +133,7 @@ export async function createAdmission(
   });
 
   if (!user) {
-    const passwordSeed = randomBytes(32).toString("hex");
+    const passwordSeed = input.applicant.email;
     const hashedPassword = await argon2.hash(passwordSeed);
 
     user = await prisma.user.create({

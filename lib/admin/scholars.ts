@@ -1,5 +1,3 @@
-import { randomBytes } from "crypto";
-
 import argon2 from "argon2";
 import { Prisma, RoleKey } from "@prisma/client";
 import { z } from "zod";
@@ -250,10 +248,7 @@ export async function inviteScholar(rawInput: InviteScholarInput) {
         throw new Error("Scholar role is not configured for this tenant");
       }
 
-      const passwordSeed = randomBytes(36)
-        .toString("base64")
-        .replace(/[^a-zA-Z0-9]/g, "")
-        .slice(0, 16);
+      const passwordSeed = input.email;
       const hashedPassword = await argon2.hash(passwordSeed);
 
       const user = await tx.user.create({

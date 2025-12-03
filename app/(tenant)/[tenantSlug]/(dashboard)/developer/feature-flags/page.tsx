@@ -1,10 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function DeveloperFeatureFlagsPage({
+export default async function DeveloperFeatureFlagsPage({
     params,
 }: {
-    params: { tenantSlug: string };
+    params: Promise<{ tenantSlug: string }>;
 }) {
+    const { tenantSlug } = await params;
     return (
         <div className="space-y-6">
             <div className="space-y-2">
@@ -12,7 +13,7 @@ export default function DeveloperFeatureFlagsPage({
                     Feature flag registry
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                    Toggle experiments and rollout plans for {params.tenantSlug}. This workspace keeps tenant safe-guards top of mind.
+                    Toggle experiments and rollout plans for {tenantSlug}. This workspace keeps tenant safe-guards top of mind.
                 </p>
             </div>
             <Card className="border-border/60 bg-card/70">

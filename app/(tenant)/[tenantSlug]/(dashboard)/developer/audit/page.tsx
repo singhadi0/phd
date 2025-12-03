@@ -1,10 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function DeveloperAuditPage({
+export default async function DeveloperAuditPage({
     params,
 }: {
-    params: { tenantSlug: string };
+    params: Promise<{ tenantSlug: string }>;
 }) {
+    const { tenantSlug } = await params;
     return (
         <div className="space-y-6">
             <div className="space-y-2">
@@ -12,7 +13,7 @@ export default function DeveloperAuditPage({
                     Audit analytics
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                    Deep dive into system events, schema drift, and integration checkpoints for {params.tenantSlug}.
+                    Deep dive into system events, schema drift, and integration checkpoints for {tenantSlug}.
                 </p>
             </div>
             <Card className="border-border/60 bg-card/70">

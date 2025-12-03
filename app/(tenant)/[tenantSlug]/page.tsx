@@ -11,9 +11,9 @@ import { ensureTenantMembership } from "@/lib/auth/navigation";
 export default async function TenantHome({
     params,
 }: {
-    params: { tenantSlug: string };
+    params: Promise<{ tenantSlug: string }>;
 }) {
-    const { tenantSlug } = params;
+    const { tenantSlug } = await params;
 
     const session = await requireSession();
     const membership = ensureTenantMembership(session, {

@@ -19,11 +19,12 @@ function formatDate(value: string) {
 export default async function DeveloperOverviewPage({
     params,
 }: {
-    params: { tenantSlug: string };
+    params: Promise<{ tenantSlug: string }>;
 }) {
+    const { tenantSlug } = await params;
     const session = await requireSession();
     const membership = ensureTenantMembership(session, {
-        tenantSlug: params.tenantSlug,
+        tenantSlug,
         roleKey: "DEVELOPER",
     });
 

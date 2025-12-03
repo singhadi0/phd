@@ -1,10 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function DeveloperIntegrationsPage({
+export default async function DeveloperIntegrationsPage({
     params,
 }: {
-    params: { tenantSlug: string };
+    params: Promise<{ tenantSlug: string }>;
 }) {
+    const { tenantSlug } = await params;
     return (
         <div className="space-y-6">
             <div className="space-y-2">
@@ -12,7 +13,7 @@ export default function DeveloperIntegrationsPage({
                     Integration control plane
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                    Manage webhooks, background jobs, and API credentials scoped to {params.tenantSlug}.
+                    Manage webhooks, background jobs, and API credentials scoped to {tenantSlug}.
                 </p>
             </div>
             <Card className="border-border/60 bg-card/70">

@@ -12,9 +12,9 @@ export default async function AdminLayout({
     params,
 }: {
     children: ReactNode;
-    params: { tenantSlug: string };
+    params: Promise<{ tenantSlug: string }>;
 }) {
-    const { tenantSlug } = params;
+    const { tenantSlug } = await params;
 
     const session = await requireSession();
     const membership = ensureTenantMembership(session, {

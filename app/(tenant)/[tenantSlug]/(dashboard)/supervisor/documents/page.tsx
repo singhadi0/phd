@@ -1,10 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function SupervisorDocumentsPage({
+export default async function SupervisorDocumentsPage({
     params,
 }: {
-    params: { tenantSlug: string };
+    params: Promise<{ tenantSlug: string }>;
 }) {
+    const { tenantSlug } = await params;
     return (
         <div className="space-y-6">
             <div className="space-y-2">
@@ -12,7 +13,7 @@ export default function SupervisorDocumentsPage({
                     Document moderation
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                    Review scholar submissions, leave annotations, and coordinate approvals for {params.tenantSlug}.
+                    Review scholar submissions, leave annotations, and coordinate approvals for {tenantSlug}.
                 </p>
             </div>
             <Card className="border-border/60 bg-card/70">
