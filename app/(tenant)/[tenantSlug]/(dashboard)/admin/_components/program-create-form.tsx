@@ -8,15 +8,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-type Props = {
-    tenantSlug: string;
+const UNASSIGNED_DEPARTMENT = "UNASSIGNED";
+
+type DepartmentOption = {
+    id: string;
+    name: string;
+    code: string | null;
 };
 
-export function ProgramCreateForm({ tenantSlug }: Props) {
+type Props = {
+    tenantSlug: string;
+    departments: DepartmentOption[];
+};
+
+export function ProgramCreateForm({ tenantSlug, departments }: Props) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [message, setMessage] = useState<{ type: "success" | "error"; label: string } | null>(null);
     const [courseworkRequired, setCourseworkRequired] = useState("yes");
+    const [departmentId, setDepartmentId] = useState(UNASSIGNED_DEPARTMENT);
 
     return (
         <form
@@ -56,6 +66,7 @@ export function ProgramCreateForm({ tenantSlug }: Props) {
 
                         event.currentTarget.reset();
                         setCourseworkRequired("yes");
+                        setDepartmentId(UNASSIGNED_DEPARTMENT);
                         setMessage({ type: "success", label: "Program created successfully." });
                         router.refresh();
                     } catch (error) {
@@ -99,13 +110,35 @@ export function ProgramCreateForm({ tenantSlug }: Props) {
                     <input type="hidden" name="courseworkRequired" value={courseworkRequired} />
                 </div>
                 <div className="sm:col-span-2 space-y-2">
-                    <Label htmlFor="departmentId">Department ID</Label>
-                    <Input
-                        id="departmentId"
+                    <Label htmlFor="departmentId">Department</Label>
+                    <Select
+                        value={departmentId}
+                        onValueChange={setDepartmentId}
+                        disabled={isPending || (!departments.length && departmentId === UNASSIGNED_DEPARTMENT)}
+                    >
+                        <SelectTrigger id="departmentId" className="h-10 w-full">
+                            <SelectValue placeholder={departments.length ? "Select department" : "No departments configured"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value={UNASSIGNED_DEPARTMENT}>No department</SelectItem>
+                            {departments.map((department) => (
+                                <SelectItem key={department.id} value={department.id}>
+                                    {department.name}
+                                    {department.code ? ` (${department.code})` : ""}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <input
+                        type="hidden"
                         name="departmentId"
-                        placeholder="Optional"
-                        disabled={isPending}
+                        value={departmentId === UNASSIGNED_DEPARTMENT ? "" : departmentId}
                     />
+                    {!departments.length ? (
+                        <p className="text-xs text-muted-foreground">
+                            Create a department to scope the program or leave it unassigned for now.
+                        </p>
+                    ) : null}
                 </div>
             </div>
             {message ? (

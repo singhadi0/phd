@@ -102,6 +102,21 @@ export async function createProgram(input: CreateProgramInput) {
     throw new Error("Program duration must be a positive integer");
   }
 
+  let departmentId: string | undefined;
+
+  if (input.departmentId) {
+    const department = await prisma.department.findUnique({
+      where: { id: input.departmentId },
+      select: { tenantId: true },
+    });
+
+    if (!department || department.tenantId !== input.tenantId) {
+      throw new Error("Department not found for tenant");
+    }
+
+    departmentId = input.departmentId;
+  }
+
   return prisma.program.create({
     data: {
       tenantId: input.tenantId,
@@ -109,7 +124,7 @@ export async function createProgram(input: CreateProgramInput) {
       code: input.code ?? null,
       durationMonths: duration,
       courseworkRequired: input.courseworkRequired ?? true,
-      departmentId: input.departmentId ?? undefined,
+      departmentId,
     },
   });
 }

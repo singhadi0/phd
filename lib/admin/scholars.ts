@@ -263,14 +263,23 @@ export async function inviteScholar(rawInput: InviteScholarInput) {
         },
       });
 
-      await tx.tenantMembership.create({
+      const membership = await tx.tenantMembership.create({
         data: {
           userId: user.id,
           tenantId: input.tenantId,
           roleId: role.id,
-          status: "invited",
+          status: "active",
+          primary: true,
           title: "PhD Scholar",
           permissions: role.permissions,
+        },
+      });
+
+      await tx.scholarProfile.create({
+        data: {
+          tenantId: input.tenantId,
+          userId: user.id,
+          membershipId: membership.id,
         },
       });
 

@@ -370,6 +370,11 @@ async function buildSupervisorNav(context: {
       icon: "LayoutDashboard",
     },
     {
+      title: "Onboarding",
+      href: `/${context.tenantSlug}/supervisor/onboarding`,
+      icon: "ListChecks",
+    },
+    {
       title: "Scholars",
       href: `/${context.tenantSlug}/supervisor/scholars`,
       icon: "Users",

@@ -1,51 +1,56 @@
-# phd
+# Research X PhD Management Platform
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Research X is a multi-tenant PhD lifecycle platform that serves scholars, supervisors, administrators, and developers. The stack is built on Next.js App Router, Prisma, and PostgreSQL with NextAuth credentials and Shadcn UI.
 
-## TODO
+## Feature Highlights
 
-- Stand up a Prisma + PostgreSQL backend including multi-tenant schemas, role entities (Scholar, Supervisor, Admin, Developer), and admission pathway models (NET/JRF, GATE, Direct, College Exam).
-- Implement authentication and authorization using NextAuth (or equivalent) with hashed credentials, refresh tokens, and tenant-scoped RBAC middleware.
-- Scaffold core dashboards (Scholar, Supervisor, Admin, Developer) using Shadcn components, Tailwind widgets, and data widgets for deadlines, fees, documents, and approvals.
-- Build admissions workflow UI showing status progression, college-specific entrance exam handling, and configurable approval rules per tenant.
-- Add document management with S3-backed storage, version history, audit logging, and review state machine (Draft → Submitted → UnderReview → Approved/Rejected).
-- Deliver communication center (messaging + notifications), meeting scheduler, and reminder job queue powered by Redis/BullMQ.
-- Create scholarship and financial assistance ledger tracking disbursements, funding sources, and uploaded proofs for each scholar.
-- Integrate analytics dashboards (Recharts) for progress metrics, milestone timelines, fee summaries, and risk indicators across roles.
-- Provide Excel/CSV import-export tooling for faculty data plus configurable templates per college.
-- Containerize services with Docker, wire GitHub Actions CI (lint, typecheck, tests, Prisma migrations), and prepare staging deployment workflow.
+- Tenant-scoped auth with role-aware redirects and dashboard shells
+- Admin tooling for program catalogs, course creation, scholar invitations, fee ledgers, and enrollments
+- Scholar dashboard summarising onboarding progress, finances, coursework, documents, and meetings
+- Seed data representing a demo university, seeded roles, and example timelines for smoke testing
 
-## Getting Started
+## Tech Stack
 
-First, run the development server:
+- Next.js 15 (App Router, server actions)
+- TypeScript + ESLint flat config
+- Prisma ORM on PostgreSQL
+- NextAuth credentials provider with argon2 hashing
+- Shadcn UI + Tailwind CSS v4 tokens
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Prerequisites
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Node.js 20+
+- pnpm 9 (preferred) or npm
+- PostgreSQL 15+ running locally or remotely
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Local Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Install dependencies: `pnpm install`
+2. Copy `.env.example` to `.env.local` and set `DATABASE_URL`, `DIRECT_URL`, `NEXTAUTH_SECRET`, and `NEXTAUTH_URL`
+3. Run migrations: `pnpm prisma migrate dev --name init`
+4. Seed demo data: `pnpm prisma db seed`
+5. Start development server: `pnpm dev`
 
-## Learn More
+Visit `http://localhost:3000` and sign in with one of the seeded accounts:
 
-To learn more about Next.js, take a look at the following resources:
+- Admin: `admin@researchx.test` / `Password123!`
+- Supervisor: `supervisor@researchx.test` / `Password123!`
+- Scholar: `scholar@researchx.test` / `Password123!`
+- Developer: `developer@researchx.test` / `Password123!`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Useful Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `pnpm lint` — run ESLint with type-aware rules
+- `pnpm prisma studio` — open Prisma Studio for ad-hoc data inspection
+- `pnpm prisma migrate dev --name <label>` — add a schema migration
+- `pnpm prisma db seed` — reseed the database (destructive for existing data)
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `app/` — Next.js App Router tree (public auth, tenant dashboards, API routes)
+- `components/` — Shadcn UI primitives and shared components
+- `lib/` — server utilities, Prisma data access, auth helpers, dashboard summaries
+- `prisma/` — schema and seed script
+- `Revised Research X/` — product discovery artefacts and requirement references
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Keep the development playbook in `development-doc.md` up to date when major workflows or dependencies change.

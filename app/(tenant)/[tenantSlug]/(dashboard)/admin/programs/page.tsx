@@ -2,9 +2,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { MetricCard } from "@/app/(tenant)/[tenantSlug]/(dashboard)/_components/metric-card";
 import { CourseCreateForm } from "@/app/(tenant)/[tenantSlug]/(dashboard)/admin/_components/course-create-form";
+import { DepartmentCreateForm } from "@/app/(tenant)/[tenantSlug]/(dashboard)/admin/_components/department-create-form";
 import { ProgramCreateForm } from "@/app/(tenant)/[tenantSlug]/(dashboard)/admin/_components/program-create-form";
 import { fetchTenantApi } from "@/lib/api/tenant-fetch";
 import type { AdminProgramList } from "@/lib/admin/programs";
+import type { AdminDepartmentSummary } from "@/lib/admin/departments";
 
 function formatDate(value: string) {
     return new Intl.DateTimeFormat("en-IN", {
@@ -19,10 +21,10 @@ export default async function AdminProgramsPage({
 }) {
     const { tenantSlug } = await params;
 
-    const programs = await fetchTenantApi<AdminProgramList>(
-        tenantSlug,
-        "/admin/programs"
-    );
+    const [programs, departments] = await Promise.all([
+        fetchTenantApi<AdminProgramList>(tenantSlug, "/admin/programs"),
+        fetchTenantApi<AdminDepartmentSummary[]>(tenantSlug, "/admin/departments"),
+    ]);
 
     const programOptions = programs.items.map((program) => ({
         id: program.id,
@@ -39,7 +41,12 @@ export default async function AdminProgramsPage({
                     Manage program structures, coursework, and milestones for {tenantSlug}.
                 </p>
             </div>
-            <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <MetricCard
+                    title="Departments"
+                    value={departments.length.toString()}
+                    description="Academic units aligned to programs"
+                />
                 <MetricCard
                     title="Programs"
                     value={programs.stats.totalPrograms.toString()}
@@ -57,7 +64,20 @@ export default async function AdminProgramsPage({
                 />
             </section>
 
-            <section className="grid gap-6 lg:grid-cols-2">
+            <section className="grid gap-6 xl:grid-cols-3">
+                <Card className="border-border/60 bg-card/70">
+                    <CardHeader>
+                        <CardTitle className="text-lg font-semibold text-foreground">
+                            Create department
+                        </CardTitle>
+                        <CardDescription>
+                            Define academic units to organise programs and supervisors.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <DepartmentCreateForm tenantSlug={tenantSlug} />
+                    </CardContent>
+                </Card>
                 <Card className="border-border/60 bg-card/70">
                     <CardHeader>
                         <CardTitle className="text-lg font-semibold text-foreground">
@@ -68,7 +88,7 @@ export default async function AdminProgramsPage({
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <ProgramCreateForm tenantSlug={tenantSlug} />
+                        <ProgramCreateForm tenantSlug={tenantSlug} departments={departments} />
                     </CardContent>
                 </Card>
                 <Card className="border-border/60 bg-card/70">
@@ -90,6 +110,59 @@ export default async function AdminProgramsPage({
                     </CardContent>
                 </Card>
             </section>
+
+            <Card className="border-border/60 bg-card/70">
+                <CardHeader>
+                    <CardTitle className="text-lg font-semibold text-foreground">
+                        Department inventory
+                    </CardTitle>
+                    <CardDescription>
+                        Track core research areas, codes, and linked programs
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="overflow-hidden rounded-xl border border-border/60">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-64">Department</TableHead>
+                                <TableHead>Code</TableHead>
+                                <TableHead className="text-center">Programs</TableHead>
+                                <TableHead>Description</TableHead>
+                                <TableHead className="text-right">Updated</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {departments.length ? (
+                                departments.map((department) => (
+                                    <TableRow key={department.id}>
+                                        <TableCell>
+                                            <div className="font-medium text-foreground">{department.name}</div>
+                                        </TableCell>
+                                        <TableCell className="text-sm text-muted-foreground">
+                                            {department.code ?? "—"}
+                                        </TableCell>
+                                        <TableCell className="text-center text-sm text-foreground">
+                                            {department.programCount}
+                                        </TableCell>
+                                        <TableCell className="max-w-md text-sm text-muted-foreground">
+                                            {department.description ?? "—"}
+                                        </TableCell>
+                                        <TableCell className="text-right text-xs text-muted-foreground">
+                                            {formatDate(department.updatedAt)}
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="py-6 text-center text-sm text-muted-foreground">
+                                        No departments have been created yet.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
 
             <Card className="border-border/60 bg-card/70">
                 <CardHeader>
