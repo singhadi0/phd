@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Research X",
+  title: "Research & Consultancy Cell",
   description: "Multi-tenant PhD management platform",
 };
 

@@ -112,7 +112,7 @@ export function LoginForm() {
             <CardHeader>
                 <CardTitle className="text-2xl font-semibold text-foreground">Welcome back</CardTitle>
                 <CardDescription>
-                    Enter your credentials to access your Research X workspace.
+                    Enter your credentials to access your Research &amp; Consultancy Cell workspace.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -150,7 +150,7 @@ export function LoginForm() {
                         </div>
                         <Input
                             id="tenant"
-                            placeholder="research-x"
+                            placeholder="research-consultancy-cell"
                             value={formState.tenant}
                             onChange={(event) => updateField("tenant", event.target.value)}
                         />

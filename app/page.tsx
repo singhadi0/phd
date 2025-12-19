@@ -56,7 +56,7 @@ export default function Home() {
           <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-inset ring-primary/30 dark:bg-primary/20">
             RX
           </span>
-          Research X
+          Research &amp; Consultancy Cell
         </div>
         <nav className="flex items-center gap-2 text-sm font-medium">
           <ThemeToggle />
@@ -79,7 +79,7 @@ export default function Home() {
               Empower scholars, supervisors, and administrators with a single command center.
             </h1>
             <p className="max-w-xl text-lg text-muted-foreground sm:text-xl">
-              Research X streamlines admissions, supervision, documents, scholarships, and analytics across every department and campus. Built for collaboration, compliance, and scale.
+              Research &amp; Consultancy Cell streamlines admissions, supervision, documents, scholarships, and analytics across every department and campus. Built for collaboration, compliance, and scale.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button size="lg" asChild>
@@ -157,7 +157,7 @@ export default function Home() {
       </main>
 
       <footer className="mx-auto w-full max-w-6xl px-6 pb-12 text-xs text-muted-foreground sm:px-8 lg:px-12">
-        © {new Date().getFullYear()} Research X. Built for ambitious doctoral programs.
+        © {new Date().getFullYear()} Research &amp; Consultancy Cell. Built for ambitious doctoral programs.
       </footer>
     </div>
   );

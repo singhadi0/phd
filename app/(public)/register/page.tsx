@@ -6,8 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/
 import { RegisterForm } from "./_components/register-form";
 
 export const metadata = {
-    title: "Register · Research X",
-    description: "Provision a new Research X tenant for your institution.",
+    title: "Register · Research & Consultancy Cell",
+    description: "Provision a new Research & Consultancy Cell tenant for your institution.",
 };
 
 function RegisterFormSkeleton() {
@@ -42,7 +42,7 @@ export default function RegisterPage() {
             </div>
             <div className="space-y-6 text-right">
                 <span className="inline-flex items-center justify-end gap-2 rounded-full border border-border/70 bg-card/60 px-4 py-1 text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                    Research X
+                    Research &amp; Consultancy Cell
                 </span>
                 <h1 className="text-balance text-4xl font-semibold text-foreground sm:text-5xl">
                     Launch a secure PhD management workspace in minutes.
