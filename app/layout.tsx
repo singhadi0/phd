@@ -17,7 +17,13 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Research & Consultancy Cell",
-  description: "Multi-tenant PhD management platform",
+  description:
+    "Shri Ramswaroop Memorial University's centralized Ph.D. research and consultancy command center.",
+  icons: {
+    icon: "/Header.png",
+    shortcut: "/Header.png",
+    apple: "/Header.png",
+  },
 };
 
 export default function RootLayout({
@@ -28,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-dvh bg-background antialiased text-foreground`}
+        className={`${geistSans.variable} ${geistMono.variable} min-h-dvh bg-background antialiased text-foreground bg-[radial-gradient(circle_at_20%_15%,#ffffff_0%,#dff0ff_35%,#b9d8ff_65%,#8bb9ff_100%)] dark:bg-[radial-gradient(circle_at_30%_10%,#162447_0%,#0f1a33_55%,#070e1e_100%)]`}
       >
         <ThemeProvider>{children}</ThemeProvider>
       </body>

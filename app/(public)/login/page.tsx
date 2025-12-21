@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Suspense } from "react";
 
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
@@ -7,8 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/
 import { LoginForm } from "./_components/login-form";
 
 export const metadata = {
-    title: "Login · Research & Consultancy Cell",
-    description: "Access your Research & Consultancy Cell workspace.",
+    title: "Login · Research X",
+    description: "Access your Research X workspace.",
 };
 
 function LoginFormSkeleton() {
@@ -38,14 +37,11 @@ export default function LoginPage() {
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-center">
             <div className="space-y-6">
                 <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 px-4 py-1 text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                    Research &amp; Consultancy Cell
+                    Research X
                 </span>
-                <div>
-                    <Image src="/images/logo.svg" alt="Research & Consultancy Cell" width={220} height={66} className="mb-4" />
-                    <h1 className="text-balance text-4xl font-semibold text-foreground sm:text-5xl">
-                        Log in to continue your journey
-                    </h1>
-                </div>
+                <h1 className="text-balance text-4xl font-semibold text-foreground sm:text-5xl">
+                    Log in to continue your research journey
+                </h1>
                 <p className="text-base text-muted-foreground sm:text-lg">
                     Manage admissions, track milestones, and collaborate with your supervisory team from a single, secure workspace.
                 </p>

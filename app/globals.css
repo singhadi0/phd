@@ -45,77 +45,78 @@
 
 :root {
   --radius: 0.625rem;
-  --background: #0b69ff;
-  --foreground: #ffffff;
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --background: #e9f3ff;
+  --foreground: #091631;
+  --card: #f9fbff;
+  --card-foreground: #091631;
+  --popover: #ffffff;
+  --popover-foreground: #091631;
+  --primary: #1c3d98;
+  --primary-foreground: #fefaf6;
+  --secondary: #f7c546;
+  --secondary-foreground: #1e2438;
+  --muted: #d9e6fb;
+  --muted-foreground: #35507c;
+  --accent: #e73f32;
+  --accent-foreground: #fffdfa;
+  --destructive: #c62828;
+  --border: #c3d6f2;
+  --input: #c3d6f2;
+  --ring: #5e7ae0;
+  --chart-1: #1c3d98;
+  --chart-2: #e73f32;
+  --chart-3: #f7c546;
+  --chart-4: #2c8fdc;
+  --chart-5: #6c3edb;
+  --sidebar: #f0f6ff;
+  --sidebar-foreground: #0f2448;
+  --sidebar-primary: #1c3d98;
+  --sidebar-primary-foreground: #fefcfa;
+  --sidebar-accent: #e73f32;
+  --sidebar-accent-foreground: #fffdfa;
+  --sidebar-border: #c3d6f2;
+  --sidebar-ring: #5e7ae0;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #050c1d;
+  --foreground: #f1f6ff;
+  --card: #0b1734;
+  --card-foreground: #f1f6ff;
+  --popover: #0f1c3a;
+  --popover-foreground: #f1f6ff;
+  --primary: #8cbbff;
+  --primary-foreground: #08132c;
+  --secondary: #ffd276;
+  --secondary-foreground: #2e1a04;
+  --muted: #111e3f;
+  --muted-foreground: #a8bce5;
+  --accent: #ff7a6c;
+  --accent-foreground: #2b0a08;
+  --destructive: #ff8a80;
+  --border: rgba(255, 255, 255, 0.14);
+  --input: rgba(255, 255, 255, 0.2);
+  --ring: #8cbbff;
+  --chart-1: #9cc4ff;
+  --chart-2: #ff9b76;
+  --chart-3: #ffe487;
+  --chart-4: #5ac4ff;
+  --chart-5: #c5a7ff;
+  --sidebar: #0d182f;
+  --sidebar-foreground: #f1f6ff;
+  --sidebar-primary: #8cbbff;
+  --sidebar-primary-foreground: #09142e;
+  --sidebar-accent: #ff7a6c;
+  --sidebar-accent-foreground: #2b0a08;
+  --sidebar-border: rgba(255, 255, 255, 0.12);
+  --sidebar-ring: #8cbbff;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
