@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { hash } from "argon2";
 import { RoleKey } from "@prisma/client";
@@ -7,11 +8,6 @@ import prisma from "@/lib/db";
 
 const bodySchema = z.object({
   tenantName: z.string().min(2).max(120),
-  tenantSlug: z
-    .string()
-    .min(2)
-    .max(80)
-    .regex(/^[a-z0-9-]+$/, "Use lowercase letters, numbers, and hyphen"),
   firstName: z.string().min(1).max(80),
   lastName: z.string().min(1).max(80),
   email: z.string().email(),
@@ -60,6 +56,33 @@ const ROLE_SEED: Array<{
   },
 ];
 
+function slugifyTenantName(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+async function ensureUniqueTenantSlug(name: string): Promise<string> {
+  const base = slugifyTenantName(name) || `tenant-${randomUUID().slice(0, 8)}`;
+  let candidate = base;
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const existing = await prisma.tenant.findUnique({
+      where: { slug: candidate },
+    });
+    if (!existing) {
+      return candidate;
+    }
+    candidate = `${base}-${randomUUID().slice(0, 4)}`;
+  }
+
+  throw new Error("Unable to generate a unique tenant slug");
+}
+
 export async function POST(request: Request) {
   try {
     const parsed = bodySchema.safeParse(await request.json());
@@ -71,20 +94,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const { tenantName, tenantSlug, firstName, lastName, email, password } =
-      parsed.data;
+    const { tenantName, firstName, lastName, email, password } = parsed.data;
 
-    const [existingTenant, existingUser] = await Promise.all([
-      prisma.tenant.findUnique({ where: { slug: tenantSlug } }),
+    const [tenantSlug, existingUser] = await Promise.all([
+      ensureUniqueTenantSlug(tenantName),
       prisma.user.findUnique({ where: { email: email.toLowerCase() } }),
     ]);
-
-    if (existingTenant) {
-      return NextResponse.json(
-        { error: "Tenant slug is already in use." },
-        { status: 409 }
-      );
-    }
 
     if (existingUser) {
       return NextResponse.json(

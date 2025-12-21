@@ -80,7 +80,7 @@ export default async function TenantHome({
             <div className="space-y-2">
                 <h1 className="text-3xl font-semibold text-foreground">Choose how you want to work</h1>
                 <p className="max-w-2xl text-sm text-muted-foreground">
-                    Research X detected multiple workspaces for your account. Pick the interface that best matches the task you want to complete right now.
+                    research and consultancy detected multiple workspaces for your account. Pick the interface that best matches the task you want to complete right now.
                 </p>
             </div>
             <div className="grid gap-6 sm:grid-cols-2">

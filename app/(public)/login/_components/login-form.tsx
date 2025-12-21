@@ -13,7 +13,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 type FormState = {
     email: string;
     password: string;
-    tenant: string;
 };
 
 export function LoginForm() {
@@ -25,7 +24,6 @@ export function LoginForm() {
     const [formState, setFormState] = useState<FormState>({
         email: "",
         password: "",
-        tenant: "",
     });
     const [error, setError] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
@@ -81,13 +79,12 @@ export function LoginForm() {
         event.preventDefault();
         setError(null);
 
-        const { email, password, tenant } = formState;
+        const { email, password } = formState;
 
         startTransition(async () => {
             const response = await signIn("credentials", {
                 email,
                 password,
-                tenant: tenant || undefined,
                 redirect: false,
             });
 
@@ -108,11 +105,11 @@ export function LoginForm() {
     }
 
     return (
-        <Card className="w-full max-w-md border-border/60 bg-card/80 shadow-2xl shadow-primary/10 backdrop-blur">
+        <Card className="w-full max-w-lg border-border/60 bg-card/80 shadow-2xl shadow-primary/10 backdrop-blur">
             <CardHeader>
                 <CardTitle className="text-2xl font-semibold text-foreground">Welcome back</CardTitle>
                 <CardDescription>
-                    Enter your credentials to access your Research X workspace.
+                    Enter your credentials to access your research and consultancy workspace.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -141,22 +138,6 @@ export function LoginForm() {
                             onChange={(event) => updateField("password", event.target.value)}
                             required
                         />
-                    </div>
-
-                    <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                            <Label htmlFor="tenant">Tenant slug</Label>
-                            <span className="text-xs text-muted-foreground">Optional</span>
-                        </div>
-                        <Input
-                            id="tenant"
-                            placeholder="research-x"
-                            value={formState.tenant}
-                            onChange={(event) => updateField("tenant", event.target.value)}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                            Provide the tenant slug if you belong to multiple campuses or programs.
-                        </p>
                     </div>
 
                     {error ? (

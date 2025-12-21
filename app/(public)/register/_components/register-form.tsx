@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 
 interface RegisterFormState {
     tenantName: string;
-    tenantSlug: string;
     firstName: string;
     lastName: string;
     email: string;
@@ -24,7 +23,6 @@ export function RegisterForm() {
     const defaultErrorMessage = "Registration failed. Please try again.";
     const [formState, setFormState] = useState<RegisterFormState>({
         tenantName: "",
-        tenantSlug: "",
         firstName: "",
         lastName: "",
         email: "",
@@ -55,7 +53,6 @@ export function RegisterForm() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     tenantName: formState.tenantName,
-                    tenantSlug: formState.tenantSlug,
                     firstName: formState.firstName,
                     lastName: formState.lastName,
                     email: formState.email,
@@ -105,7 +102,6 @@ export function RegisterForm() {
             setSuccess("Tenant created successfully. You can now sign in.");
             setFormState({
                 tenantName: "",
-                tenantSlug: "",
                 firstName: "",
                 lastName: "",
                 email: "",
@@ -120,7 +116,7 @@ export function RegisterForm() {
     }
 
     return (
-        <Card className="w-full max-w-md border-border/60 bg-card/80 text-foreground shadow-2xl shadow-primary/10 backdrop-blur">
+        <Card className="w-full max-w-2xl border-border/60 bg-card/80 text-foreground shadow-2xl shadow-primary/10 backdrop-blur">
             <CardHeader>
                 <CardTitle className="text-2xl font-semibold text-foreground">Create a new tenant</CardTitle>
                 <CardDescription className="text-muted-foreground">
@@ -129,29 +125,15 @@ export function RegisterForm() {
             </CardHeader>
             <CardContent>
                 <form className="space-y-6" onSubmit={handleSubmit}>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                            <Label htmlFor="tenantName">Tenant name</Label>
-                            <Input
-                                id="tenantName"
-                                value={formState.tenantName}
-                                onChange={(event) => updateField("tenantName", event.target.value)}
-                                placeholder="School of Advanced Research"
-                                required
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="tenantSlug">Tenant slug</Label>
-                            <Input
-                                id="tenantSlug"
-                                value={formState.tenantSlug}
-                                onChange={(event) => updateField("tenantSlug", event.target.value.toLowerCase())}
-                                placeholder="advanced-research"
-                                pattern="[a-z0-9-]+"
-                                title="Use only lowercase letters, numbers, and hyphen"
-                                required
-                            />
-                        </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="tenantName">Tenant name</Label>
+                        <Input
+                            id="tenantName"
+                            value={formState.tenantName}
+                            onChange={(event) => updateField("tenantName", event.target.value)}
+                            placeholder="School of Advanced Research"
+                            required
+                        />
                     </div>
 
                     <div className="grid gap-4 sm:grid-cols-2">

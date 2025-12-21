@@ -27,7 +27,7 @@ export default async function DeveloperFeatureFlagsPage({
                 </CardHeader>
                 <CardContent>
                     <p className="text-sm text-muted-foreground">
-                        The implementation will integrate with the feature flag service backing Research X, including history, drift detection, and audit logging.
+                        The implementation will integrate with the feature flag service backing research and consultancy, including history, drift detection, and audit logging.
                     </p>
                 </CardContent>
             </Card>

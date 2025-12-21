@@ -68,21 +68,16 @@ export function TenantSettingsForm({ tenantSlug, initialSettings }: Props) {
             }}
         >
             <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
+                <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="tenant-name">Tenant name</Label>
                     <Input
                         id="tenant-name"
                         value={state.name}
                         onChange={(event) => setState((current) => ({ ...current, name: event.target.value }))}
-                        placeholder="Research X University"
+                        placeholder="research and consultancy campus"
                         disabled={isPending}
                         required
                     />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="tenant-slug">Tenant slug</Label>
-                    <Input id="tenant-slug" value={initialSettings.slug} disabled readOnly className="bg-muted/40" />
-                    <p className="text-xs text-muted-foreground">Slug controls routing and cannot be changed here.</p>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="tenant-email">Contact email</Label>
@@ -91,7 +86,7 @@ export function TenantSettingsForm({ tenantSlug, initialSettings }: Props) {
                         type="email"
                         value={state.contactEmail}
                         onChange={(event) => setState((current) => ({ ...current, contactEmail: event.target.value }))}
-                        placeholder="admin@researchx.test"
+                        placeholder="hello@researchandconsultancy.test"
                         disabled={isPending}
                     />
                 </div>
